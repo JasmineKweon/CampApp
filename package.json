@@ -1,0 +1,25 @@
+{
+  "name": "CampApp",
+  "version": "1.0.0",
+  "description": "Goal - For Tutorials / Basic NodeJS App Using - HTML5, CSS3, JavaScript - NodeJS, MongoDB, AJAX, Express",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JasmineKweon/CampApp.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/JasmineKweon/CampApp/issues"
+  },
+  "homepage": "https://github.com/JasmineKweon/CampApp#readme",
+  "dependencies": {
+    "ejs": "^3.1.6",
+    "express": "^4.17.2",
+    "mongoose": "^6.1.6"
+  }
+}

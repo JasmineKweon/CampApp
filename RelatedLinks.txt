@@ -1,0 +1,11 @@
+Express
+- https://expressjs.com/
+- Routing: https://expressjs.com/en/guide/routing.html
+
+mongoose
+- https://mongoosejs.com/
+- Connecting: https://mongoosejs.com/docs/index.html#getting-started
+
+ejs
+- https://ejs.co/
+- About app.set('view engine') && app.set('views'): http://expressjs.com/en/5x/api.html#app.set

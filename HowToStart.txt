@@ -1,0 +1,3 @@
+1. Create a project folder
+2. cd to the folder and do "npm init"
+3. Do "npm i express mongoose ejs"
