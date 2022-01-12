@@ -8,7 +8,8 @@ const Shcema = mongoose.Schema;
 
 const CampgroundSchema = new mongoose.Schema({
     title: String,
-    price: String,
+    image: String,
+    price: Number,
     description: String,
     location: String
 })

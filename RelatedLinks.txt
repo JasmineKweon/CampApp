@@ -9,3 +9,12 @@ mongoose
 ejs
 - https://ejs.co/
 - About app.set('view engine') && app.set('views'): http://expressjs.com/en/5x/api.html#app.set
+
+BootStrap
+ - https://getbootstrap.com/
+ - https://getbootstrap.com/docs/5.1/getting-started/introduction/
+ - https://getbootstrap.com/docs/5.1/components/navbar/
+
+
+ejs-mate
+- https://github.com/JacksonTian/ejs-mate

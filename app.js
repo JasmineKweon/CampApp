@@ -23,9 +23,6 @@ If an array, the views are looked up in the order they occur in the array.*/
 __dirname is an environment variable that tells you the absolute path of the directory containing the currently executing file.
 path.join(__dirname, 'views') returns the current running directory/views*/
 
-//Require all the necessary modules
-const Campground = require('./models/campground');
-
 //In order to receive urlencoded as req.body
 app.use(express.urlencoded({ extended: true }));
 
@@ -34,6 +31,15 @@ app.use(express.urlencoded({ extended: true }));
 const methodOverride = require('method-override');
 //_method should match with _method on ejs file, doesn't have to be _method
 app.use(methodOverride('_method'));
+
+//ejsMate is Express (layout, partial, block) template functions for the EJS template engine
+const ejsMate = require('ejs-mate')
+    //Declare we want to use ejsMate instead of default one. 
+app.engine('ejs', ejsMate)
+
+
+//Require all the necessary modules
+const Campground = require('./models/campground');
 
 //API calls
 app.get('/', (req, res) => {
