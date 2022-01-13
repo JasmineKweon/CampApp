@@ -18,3 +18,7 @@ BootStrap
 
 ejs-mate
 - https://github.com/JacksonTian/ejs-mate
+
+
+joi
+- https://joi.dev/api/?v=17.5.0

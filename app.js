@@ -37,11 +37,26 @@ const ejsMate = require('ejs-mate')
     //Declare we want to use ejsMate instead of default one. 
 app.engine('ejs', ejsMate)
 
+//For server-side validation
+const Joi = require('joi');
+
 //Require all the necessary modules
 const Campground = require('./models/campground');
 const catchAsync = require('./utils/catchAsync');
 const ExpressError = require('./utils/ExpressError')
-const res = require('express/lib/response');
+const { campgroundSchema } = require('./schemas.js');
+
+//middleware
+const validateCampground = (req, res, next) => {
+    const { error } = campgroundSchema.validate(req.body);
+    if (error) {
+        //error message is in array, therefore join each index by , and pass String as a msg
+        const msg = error.details.map(el => el.message).join(',')
+        throw new ExpressError(msg, 400)
+    } else {
+        next();
+    }
+}
 
 //API calls
 app.get('/', (req, res) => {
@@ -50,7 +65,6 @@ app.get('/', (req, res) => {
     //res.render('page', {argument1, argument2}) -> go to views/page.ejs as passing arguments
     //res.send('msg') -> displays msg on page
 })
-
 
 app.get('/campgrounds', catchAsync(async(req, res) => { // If you have await in function, you need to make the function async
     const campgrounds = await Campground.find({}); //Campground.find({}) takes time, therefore need "await"
@@ -66,7 +80,7 @@ app.get('/campgrounds/:id', catchAsync(async(req, res) => {
     res.render('campgrounds/show', { campground })
 }))
 
-app.post('/campgrounds', catchAsync(async(req, res) => {
+app.post('/campgrounds', validateCampground, catchAsync(async(req, res) => {
     const campground = new Campground(req.body.campground);
     await campground.save();
     res.redirect(`/campgrounds/${campground._id}`);
@@ -78,7 +92,7 @@ app.get('/campgrounds/:id/edit', catchAsync(async(req, res) => {
     res.render('campgrounds/edit', { campground });
 }))
 
-app.put('/campgrounds/:id', catchAsync(async(req, res) => {
+app.put('/campgrounds/:id', validateCampground, catchAsync(async(req, res) => {
     const { id } = req.params;
     const campground = await Campground.findByIdAndUpdate(id, {...req.body.campground });
     console.log(campground)
