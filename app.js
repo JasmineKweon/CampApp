@@ -37,9 +37,11 @@ const ejsMate = require('ejs-mate')
     //Declare we want to use ejsMate instead of default one. 
 app.engine('ejs', ejsMate)
 
-
 //Require all the necessary modules
 const Campground = require('./models/campground');
+const catchAsync = require('./utils/catchAsync');
+const ExpressError = require('./utils/ExpressError')
+const res = require('express/lib/response');
 
 //API calls
 app.get('/', (req, res) => {
@@ -50,43 +52,58 @@ app.get('/', (req, res) => {
 })
 
 
-app.get('/campgrounds', async(req, res) => { // If you have await in function, you need to make the function async
+app.get('/campgrounds', catchAsync(async(req, res) => { // If you have await in function, you need to make the function async
     const campgrounds = await Campground.find({}); //Campground.find({}) takes time, therefore need "await"
     res.render('campgrounds/index', { campgrounds });
-})
+}))
 
 app.get('/campgrounds/new', (req, res) => {
     res.render('campgrounds/new');
 })
 
-app.get('/campgrounds/:id', async(req, res) => {
+app.get('/campgrounds/:id', catchAsync(async(req, res) => {
     const campground = await Campground.findById(req.params.id) //id should match with :id
     res.render('campgrounds/show', { campground })
-})
+}))
 
-app.post('/campgrounds', async(req, res) => {
+app.post('/campgrounds', catchAsync(async(req, res) => {
     const campground = new Campground(req.body.campground);
     await campground.save();
     res.redirect(`/campgrounds/${campground._id}`);
     //Redirect is needed to prevent user to refreshing the page and repeat updating
-})
+}))
 
-app.get('/campgrounds/:id/edit', async(req, res) => {
+app.get('/campgrounds/:id/edit', catchAsync(async(req, res) => {
     const campground = await Campground.findById(req.params.id);
     res.render('campgrounds/edit', { campground });
-})
+}))
 
-app.put('/campgrounds/:id', async(req, res) => {
+app.put('/campgrounds/:id', catchAsync(async(req, res) => {
     const { id } = req.params;
     const campground = await Campground.findByIdAndUpdate(id, {...req.body.campground });
     console.log(campground)
     res.redirect(`/campgrounds/${campground._id}`)
-})
+}))
 
-app.delete('/campgrounds/:id', async(req, res) => {
+app.delete('/campgrounds/:id', catchAsync(async(req, res) => {
     const { id } = req.params;
     await Campground.findByIdAndDelete(id);
     res.redirect('/campgrounds');
+}))
+
+//When page user is searching for does not exist, it comes to here! 
+// Here, it sets ExpressError with following info and send it to app.use
+app.all('*', (req, res, next) => {
+    next(new ExpressError('Page Not Found', 404))
+})
+
+//Error Handling 
+app.use((err, req, res, next) => {
+    const { statusCode = 500 } = err;
+    if (!err.message) err.message = 'Oh No, Something Went Wrong!';
+    res.status(statusCode).render('error', { err });
+    //next(err); If you insert this code, it goes to next error-handling. 
+    //In this case, it goes to Expree default error handling
 })
 
 //Listening on port 3000
