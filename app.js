@@ -87,7 +87,7 @@ app.get('/campgrounds/new', (req, res) => {
 })
 
 app.get('/campgrounds/:id', catchAsync(async(req, res) => {
-    const campground = await Campground.findById(req.params.id) //id should match with :id
+    const campground = await Campground.findById(req.params.id).populate('reviews'); //id should match with :id, populate is needed to get review data, otherwise, it will pass only review._id
     res.render('campgrounds/show', { campground })
 }))
 
