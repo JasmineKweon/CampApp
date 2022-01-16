@@ -125,6 +125,14 @@ app.post('/campgrounds/:id/reviews', validateReview, catchAsync(async(req, res) 
     res.redirect(`/campgrounds/${campground._id}`);
 }))
 
+app.delete('/campgrounds/:id/reviews/:reviewId', catchAsync(async(req, res) => {
+    const { id, reviewId } = req.params;
+    await Campground.findByIdAndUpdate(id, { $pull: { reviews: reviewId } });
+    await Review.findByIdAndDelete(reviewId);
+    console.log("here")
+    res.redirect(`/campgrounds/${id}`);
+}))
+
 //When page user is searching for does not exist, it comes to here! 
 // Here, it sets ExpressError with following info and send it to app.use
 app.all('*', (req, res, next) => {
