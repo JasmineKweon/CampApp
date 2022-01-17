@@ -1,6 +1,6 @@
 const { use } = require('express/lib/application');
 const mongoose = require('mongoose');
-const { schema } = require('./models/campground');
+const { schema } = require('../models/campground');
 main().catch(err => console.log(err));
 async function main() {
     await mongoose.connect('mongodb://localhost:27017/camp-app');
