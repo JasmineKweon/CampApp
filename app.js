@@ -37,37 +37,16 @@ const ejsMate = require('ejs-mate')
     //Declare we want to use ejsMate instead of default one. 
 app.engine('ejs', ejsMate)
 
-//For server-side validation
-const Joi = require('joi');
-
 //Require all the necessary modules
-const Campground = require('./models/campground');
-const Review = require('./models/review')
-const catchAsync = require('./utils/catchAsync');
 const ExpressError = require('./utils/ExpressError')
-const { campgroundSchema, reviewSchema } = require('./schemas.js');
 
-//middleware for validation
-const validateCampground = (req, res, next) => {
-    const { error } = campgroundSchema.validate(req.body);
-    if (error) {
-        //error message is in array, therefore join each index by , and pass String as a msg
-        const msg = error.details.map(el => el.message).join(',')
-        throw new ExpressError(msg, 400)
-    } else {
-        next();
-    }
-}
+//Require all the necessary routes
+const campgrounds = require('./routes/campgrounds');
+const reviews = require('./routes/reviews');
 
-const validateReview = (req, res, next) => {
-    const { error } = reviewSchema.validate(req.body);
-    if (error) {
-        const msg = error.details.map(el => el.message).join(',')
-        throw new ExpressError(msg, 400)
-    } else {
-        next();
-    }
-}
+//Declare that all the campgrounds routes to start with /campgrounds
+app.use("/campgrounds", campgrounds);
+app.use("/campgrounds/:id/reviews", reviews);
 
 //API calls
 app.get('/', (req, res) => {
@@ -76,62 +55,6 @@ app.get('/', (req, res) => {
     //res.render('page', {argument1, argument2}) -> go to views/page.ejs as passing arguments
     //res.send('msg') -> displays msg on page
 })
-
-app.get('/campgrounds', catchAsync(async(req, res) => { // If you have await in function, you need to make the function async
-    const campgrounds = await Campground.find({}); //Campground.find({}) takes time, therefore need "await"
-    res.render('campgrounds/index', { campgrounds });
-}))
-
-app.get('/campgrounds/new', (req, res) => {
-    res.render('campgrounds/new');
-})
-
-app.get('/campgrounds/:id', catchAsync(async(req, res) => {
-    const campground = await Campground.findById(req.params.id).populate('reviews'); //id should match with :id, populate is needed to get review data, otherwise, it will pass only review._id
-    res.render('campgrounds/show', { campground })
-}))
-
-app.post('/campgrounds', validateCampground, catchAsync(async(req, res) => {
-    const campground = new Campground(req.body.campground);
-    await campground.save();
-    res.redirect(`/campgrounds/${campground._id}`);
-    //Redirect is needed to prevent user to refreshing the page and repeat updating
-}))
-
-app.get('/campgrounds/:id/edit', catchAsync(async(req, res) => {
-    const campground = await Campground.findById(req.params.id);
-    res.render('campgrounds/edit', { campground });
-}))
-
-app.put('/campgrounds/:id', validateCampground, catchAsync(async(req, res) => {
-    const { id } = req.params;
-    const campground = await Campground.findByIdAndUpdate(id, {...req.body.campground });
-    console.log(campground)
-    res.redirect(`/campgrounds/${campground._id}`)
-}))
-
-app.delete('/campgrounds/:id', catchAsync(async(req, res) => {
-    const { id } = req.params;
-    await Campground.findByIdAndDelete(id);
-    res.redirect('/campgrounds');
-}))
-
-app.post('/campgrounds/:id/reviews', validateReview, catchAsync(async(req, res) => {
-    const campground = await Campground.findById(req.params.id);
-    const review = new Review(req.body.review);
-    campground.reviews.push(review);
-    await review.save();
-    await campground.save();
-    res.redirect(`/campgrounds/${campground._id}`);
-}))
-
-app.delete('/campgrounds/:id/reviews/:reviewId', catchAsync(async(req, res) => {
-    const { id, reviewId } = req.params;
-    await Campground.findByIdAndUpdate(id, { $pull: { reviews: reviewId } });
-    await Review.findByIdAndDelete(reviewId);
-    console.log("here")
-    res.redirect(`/campgrounds/${id}`);
-}))
 
 //When page user is searching for does not exist, it comes to here! 
 // Here, it sets ExpressError with following info and send it to app.use
