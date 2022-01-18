@@ -44,6 +44,38 @@ const ExpressError = require('./utils/ExpressError')
 const campgrounds = require('./routes/campgrounds');
 const reviews = require('./routes/reviews');
 
+//In order to make public folder as accessible from other files
+app.use(express.static(path.join(__dirname, 'public')));
+
+//Session for flash and authentication, need to npm
+const session = require('express-session');
+const sessionConfig = {
+    secret: 'thisshouldbebettersecret!',
+    resave: false,
+    saveUninitialized: true,
+    //add some setting to cookie that sent back from session
+    //expires in whatever miliseconds
+    cookie: {
+        //httpOnly is for extra security
+        //If the HttpOnly flag is included in the HTTP response header, the cookie cannot be accessed through client side script. 
+        httpOnly: true,
+        expires: Date.now() + 1000 * 60 * 60 * 24 * 7, //expires in a week
+        maxAge: 1000 * 60 * 60 * 24 * 7
+    }
+}
+app.use(session(sessionConfig))
+
+//In order to use flash
+const flash = require('connect-flash');
+app.use(flash());
+
+//Instead of passing success messages to ejs from every single routes
+//We can use middleware to handle it. 
+app.use((req, res, next) => {
+    res.locals.msg = req.flash('success');
+    next();
+})
+
 //Declare that all the campgrounds routes to start with /campgrounds
 app.use("/campgrounds", campgrounds);
 app.use("/campgrounds/:id/reviews", reviews);

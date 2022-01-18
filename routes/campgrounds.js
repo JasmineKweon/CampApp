@@ -10,7 +10,6 @@ const catchAsync = require('../utils/catchAsync');
 const ExpressError = require('../utils/ExpressError')
 const { campgroundSchema } = require('../schemas.js');
 
-
 //middleware for validation
 const validateCampground = (req, res, next) => {
     const { error } = campgroundSchema.validate(req.body);
@@ -40,6 +39,7 @@ router.get('/:id', catchAsync(async(req, res) => {
 router.post('/', validateCampground, catchAsync(async(req, res) => {
     const campground = new Campground(req.body.campground);
     await campground.save();
+    req.flash('success', 'Successfully made a new campgroud!');
     res.redirect(`/campgrounds/${campground._id}`);
     //Redirect is needed to prevent user to refreshing the page and repeat updating
 }))
