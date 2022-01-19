@@ -33,12 +33,17 @@ router.get('/new', (req, res) => {
 
 router.get('/:id', catchAsync(async(req, res) => {
     const campground = await Campground.findById(req.params.id).populate('reviews'); //id should match with :id, populate is needed to get review data, otherwise, it will pass only review._id
+    if (!campground) {
+        req.flash('error', 'Cannot find that campground');
+        return res.redirect('/campgrounds');
+    }
     res.render('campgrounds/show', { campground })
 }))
 
 router.post('/', validateCampground, catchAsync(async(req, res) => {
     const campground = new Campground(req.body.campground);
     await campground.save();
+    //Flash appears only when you want, if you declare flash here, then it will appear on redirected page.
     req.flash('success', 'Successfully made a new campgroud!');
     res.redirect(`/campgrounds/${campground._id}`);
     //Redirect is needed to prevent user to refreshing the page and repeat updating
@@ -52,13 +57,16 @@ router.get('/:id/edit', catchAsync(async(req, res) => {
 router.put('/:id', validateCampground, catchAsync(async(req, res) => {
     const { id } = req.params;
     const campground = await Campground.findByIdAndUpdate(id, {...req.body.campground });
-    console.log(campground)
+    //Flash appears only when you want, if you declare flash here, then it will appear on redirected page.
+    req.flash('success', 'Successfully updated the campgroud!');
     res.redirect(`/campgrounds/${campground._id}`)
 }))
 
 router.delete('/:id', catchAsync(async(req, res) => {
     const { id } = req.params;
     await Campground.findByIdAndDelete(id);
+    //Flash appears only when you want, if you declare flash here, then it will appear on redirected page.
+    req.flash('success', 'Successfully deleted the campgroud!');
     res.redirect('/campgrounds');
 }))
 

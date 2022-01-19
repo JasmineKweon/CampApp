@@ -72,7 +72,8 @@ app.use(flash());
 //Instead of passing success messages to ejs from every single routes
 //We can use middleware to handle it. 
 app.use((req, res, next) => {
-    res.locals.msg = req.flash('success');
+    res.locals.successMsg = req.flash('success');
+    res.locals.errorMsg = req.flash('error');
     next();
 })
 
