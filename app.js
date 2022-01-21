@@ -126,15 +126,6 @@ app.use("/campgrounds/:id/reviews", reviewRoutes);
 app.use("/", userRoutes);
 
 
-
-app.get('/fakeUser', async(req, res) => {
-    const user = new User({ email: 'jasminejasmine@gmail.com', username: 'jasmine' });
-    const newUser = await User.register(user, 'password');
-    res.send(newUser);
-})
-
-
-
 //API calls
 app.get('/', (req, res) => {
     res.render('home'); // move to views/home.ejs
