@@ -57,8 +57,9 @@ const ExpressError = require('./utils/ExpressError')
 
 
 //Require all the necessary routes
-const campgrounds = require('./routes/campgrounds');
-const reviews = require('./routes/reviews');
+const campgroundRoutes = require('./routes/campgrounds');
+const reviewRoutes = require('./routes/reviews');
+const userRoutes = require('./routes/users');
 
 
 
@@ -96,9 +97,9 @@ app.use(passport.initialize());
 app.use(passport.session());
 passport.use(new LocalStrategy(User.authenticate()));
 //How we store use in session
-passport.serializeUser(User.authenticate());
+passport.serializeUser(User.serializeUser());
 //How we get user out of session
-passport.deserializeUser(User.authenticate());
+passport.deserializeUser(User.deserializeUser());
 
 
 
@@ -111,6 +112,7 @@ app.use(flash());
 //Instead of passing success messages to ejs from every single routes
 //We can use middleware to handle it. 
 app.use((req, res, next) => {
+    res.locals.currentUser = req.user;
     res.locals.successMsg = req.flash('success');
     res.locals.errorMsg = req.flash('error');
     next();
@@ -119,8 +121,9 @@ app.use((req, res, next) => {
 
 
 //Declare that all the campgrounds routes to start with /campgrounds
-app.use("/campgrounds", campgrounds);
-app.use("/campgrounds/:id/reviews", reviews);
+app.use("/campgrounds", campgroundRoutes);
+app.use("/campgrounds/:id/reviews", reviewRoutes);
+app.use("/", userRoutes);
 
 
 
