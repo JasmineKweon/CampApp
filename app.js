@@ -3,6 +3,8 @@
 const express = require('express');
 const app = express();
 
+
+
 //mongoose Connect
 //Need to npm i mongoose on terminal to use
 const mongoose = require('mongoose');
@@ -10,6 +12,8 @@ main().catch(err => console.log(err));
 async function main() {
     await mongoose.connect('mongodb://localhost:27017/camp-app');
 }
+
+
 
 //Define view engine and views
 //Need to npm i ejs on terminal to use
@@ -22,9 +26,22 @@ If an array, the views are looked up in the order they occur in the array.*/
 /* __dirname:
 __dirname is an environment variable that tells you the absolute path of the directory containing the currently executing file.
 path.join(__dirname, 'views') returns the current running directory/views*/
+//ejsMate is Express (layout, partial, block) template functions for the EJS template engine
+const ejsMate = require('ejs-mate')
+    //Declare we want to use ejsMate instead of default one. 
+app.engine('ejs', ejsMate)
+
+
+
+//In order to make public folder as accessible from other files
+app.use(express.static(path.join(__dirname, 'public')));
+
+
 
 //In order to receive urlencoded as req.body
 app.use(express.urlencoded({ extended: true }));
+
+
 
 //In order to use GET/POST method as PUT/DELETE,etc methods
 //Need to npm i method-override on terminal to use
@@ -32,20 +49,23 @@ const methodOverride = require('method-override');
 //_method should match with _method on ejs file, doesn't have to be _method
 app.use(methodOverride('_method'));
 
-//ejsMate is Express (layout, partial, block) template functions for the EJS template engine
-const ejsMate = require('ejs-mate')
-    //Declare we want to use ejsMate instead of default one. 
-app.engine('ejs', ejsMate)
+
 
 //Require all the necessary modules
 const ExpressError = require('./utils/ExpressError')
+
+
 
 //Require all the necessary routes
 const campgrounds = require('./routes/campgrounds');
 const reviews = require('./routes/reviews');
 
-//In order to make public folder as accessible from other files
-app.use(express.static(path.join(__dirname, 'public')));
+
+
+//Require all necessary models
+const User = require('./models/user');
+
+
 
 //Session for flash and authentication, need to npm
 const session = require('express-session');
@@ -65,9 +85,28 @@ const sessionConfig = {
 }
 app.use(session(sessionConfig))
 
+
+
+//Use Passport
+const passport = require('passport');
+const LocalStrategy = require('passport-local');
+//To Initialize passport
+app.use(passport.initialize());
+//To use persistent login sessions
+app.use(passport.session());
+passport.use(new LocalStrategy(User.authenticate()));
+//How we store use in session
+passport.serializeUser(User.authenticate());
+//How we get user out of session
+passport.deserializeUser(User.authenticate());
+
+
+
 //In order to use flash
 const flash = require('connect-flash');
 app.use(flash());
+
+
 
 //Instead of passing success messages to ejs from every single routes
 //We can use middleware to handle it. 
@@ -77,9 +116,21 @@ app.use((req, res, next) => {
     next();
 })
 
+
+
 //Declare that all the campgrounds routes to start with /campgrounds
 app.use("/campgrounds", campgrounds);
 app.use("/campgrounds/:id/reviews", reviews);
+
+
+
+app.get('/fakeUser', async(req, res) => {
+    const user = new User({ email: 'jasminejasmine@gmail.com', username: 'jasmine' });
+    const newUser = await User.register(user, 'password');
+    res.send(newUser);
+})
+
+
 
 //API calls
 app.get('/', (req, res) => {
