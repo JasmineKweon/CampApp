@@ -8,7 +8,11 @@ const Schema = mongoose.Schema;
 
 const ReviewSchema = new Schema({
     body: String,
-    rating: Number
+    rating: Number,
+    author: {
+        type: Schema.Types.ObjectId,
+        ref: 'User'
+    }
 })
 
 //Export just created schema, so it can be used in other files

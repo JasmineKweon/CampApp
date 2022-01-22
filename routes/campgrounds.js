@@ -19,7 +19,12 @@ router.get('/new', isLoggedIn, (req, res) => {
 })
 
 router.get('/:id', catchAsync(async(req, res) => {
-    const campground = await Campground.findById(req.params.id).populate('reviews').populate('author'); //id should match with :id, populate is needed to get review data, otherwise, it will pass only review._id
+    const campground = await Campground.findById(req.params.id).populate({ // we need this in order to get review.author. we need populated author of populated review
+        path: 'reviews',
+        populate: {
+            path: 'author'
+        }
+    }).populate('author'); //id should match with :id, populate is needed to get review data, otherwise, it will pass only review._id
     if (!campground) {
         req.flash('error', 'Cannot find that campground');
         return res.redirect('/campgrounds');
