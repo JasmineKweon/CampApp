@@ -22,3 +22,10 @@ ejs-mate
 
 joi
 - https://joi.dev/api/?v=17.5.0
+
+mongo-sanitize
+- https://www.npmjs.com/package/express-mongo-sanitize
+
+Cross-Site scripting (Security Attack)
+- https://en.wikipedia.org/wiki/Cross-site_scripting
+- https://xss-game.appspot.com/

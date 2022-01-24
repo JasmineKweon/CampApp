@@ -14,6 +14,13 @@ async function main() {
 }
 
 
+//For Security Prevention 
+const mongoSanitize = require('express-mongo-sanitize');
+app.use(mongoSanitize({ // Not allowing $ sign or . sign, etc in request
+    replaceWith: '_' //If user insert above signs, then replace it with _
+}));
+
+
 
 //Define view engine and views
 //Need to npm i ejs on terminal to use
@@ -112,6 +119,7 @@ app.use(flash());
 //Instead of passing success messages to ejs from every single routes
 //We can use middleware to handle it. 
 app.use((req, res, next) => {
+    //console.log(req.query); this is for mongoSanitize.  
     res.locals.currentUser = req.user;
     res.locals.successMsg = req.flash('success');
     res.locals.errorMsg = req.flash('error');
