@@ -22,6 +22,45 @@ app.use(mongoSanitize({ // Not allowing $ sign or . sign, etc in request
 
 
 
+//Helmet: Helmet helps you secure your Express apps by setting various HTTP headers. It's not a silver bullet, but it can help!
+const helmet = require('helmet');
+app.use(helmet()); //enables all 11 middleware that comes with helmet 
+//If there's any middleware you don't want to use, insert like the following: 
+//app.use(helmet({ contentSecurityPolicy: false }));
+
+//helmet.contentSecurityPolicy sets the Content-Security-Policy header 
+//which helps mitigate cross-site scripting attacks, among other things.
+const scriptSrcUrls = [
+    "https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
+    //add if there's more
+];
+const styleSrcUrls = [
+    "https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
+];
+const connectSrcUrls = [];
+const fontSrcUrls = [];
+app.use(
+    helmet.contentSecurityPolicy({
+        directives: {
+            defaultSrc: [],
+            connectSrc: ["'self'", ...connectSrcUrls],
+            scriptSrc: ["'unsafe-inline'", "'self'", ...scriptSrcUrls],
+            styleSrc: ["'self'", "'unsafe-inline'", ...styleSrcUrls],
+            workerSrc: ["'self'", "blob:"],
+            objectSrc: [],
+            imgSrc: [
+                "'self'",
+                "blob:",
+                "data:",
+                "https://images.unsplash.com/",
+            ],
+            fontSrc: ["'self'", ...fontSrcUrls],
+        },
+    })
+);
+
+
+
 //Define view engine and views
 //Need to npm i ejs on terminal to use
 const path = require('path');
@@ -78,6 +117,7 @@ const User = require('./models/user');
 //Session for flash and authentication, need to npm
 const session = require('express-session');
 const sessionConfig = {
+    name: 'session', //the original name is "connect.sid", however for security purpose, it's better if name is set in different one because hacker's going to look for "connect.sid"
     secret: 'thisshouldbebettersecret!',
     resave: false,
     saveUninitialized: true,
@@ -85,8 +125,10 @@ const sessionConfig = {
     //expires in whatever miliseconds
     cookie: {
         //httpOnly is for extra security
-        //If the HttpOnly flag is included in the HTTP response header, the cookie cannot be accessed through client side script. 
+        //If the HttpOnly flag is included in the HTTP response header, the cookie cannot be accessed through client side script
+        //which means the cookies are only accessible by HTTP and not accessible by javascript
         httpOnly: true,
+        //secure: true, only accpets "https" not accept "http"
         expires: Date.now() + 1000 * 60 * 60 * 24 * 7, //expires in a week
         maxAge: 1000 * 60 * 60 * 24 * 7
     }

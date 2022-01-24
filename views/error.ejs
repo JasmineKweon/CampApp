@@ -8,7 +8,12 @@
                     <%= err.message %>
                 </h4>
                 <p>
-                    <%= err.stack %>
+                    <!--If it's production env, don't show stack(codes)-->
+                    <!--In order to run app in production mode, you need the following line-->
+                    <!--NODE_ENV=production node app.js-->
+                    <% if (process.env.NODE_ENV !== "production") { %>
+                        <%= err.stack %>
+                            <% } %>
                 </p>
             </div>
         </div>
