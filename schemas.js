@@ -20,3 +20,6 @@ module.exports.reviewSchema = Joi.object({
         body: Joi.string().required()
     }).required()
 })
+
+//If you need sanitize-html package: 
+//https://www.npmjs.com/package/sanitize-html
